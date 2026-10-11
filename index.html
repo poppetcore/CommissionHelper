@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일 반응형 뷰포트 설정 추가 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커미션 진행 안내 도우미</title>
+    <style>
+        /* 프리젠테이션(Freesentation) 웹폰트 */
+        @font-face {
+            font-family: 'Freesentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-4Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Freesentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-7Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Freesentation';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-8ExtraBold.woff2') format('woff2');
+            font-weight: 800;
+            font-style: normal;
+            font-display: swap;
+        }
+        /* 관리 패널로 세로 스크롤이 생겨도 화면 너비를 유지합니다. */
+        html { scrollbar-gutter: stable; }
+        body { 
+            font-family: 'Freesentation', 'Malgun Gothic', sans-serif; 
+            padding: 30px; 
+            background-color: #f1f3f5; 
+            color: #333;
+            margin: 0;
+            /* 기존에 있던 min-width: 1400px; 제거 */
+        }
+
+        h2.main-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .app-container {
+            display: flex;
+            gap: 25px; 
+            align-items: flex-start;
+        }
+        
+        .left-column, .right-column {
+            flex: 1 1 0;
+            min-width: 0;
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section-wrapper {
+            width: 100%;
+            background: white; 
+            padding: 25px; 
+            border: 1px solid #dce0e4; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04); 
+            box-sizing: border-box;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+            font-size: 22px; 
+            font-weight: 700;
+            color: #333; 
+        }
+
+        .setting-btn {
+            background-color: #f1f3f5;
+            color: #333; 
+            border: 1px solid #ced4da;
+            margin: 0;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .setting-btn:hover { background-color: #e2e6ea; }
+
+        .section-body {
+            background: #fdfdfd; 
+            padding: 20px; 
+            border: 1px solid #eeeeee; 
+            border-radius: 8px; 
+            box-sizing: border-box;
+        }
+        
+        .admin-panel {
+            display: none;
+            background-color: #f8f9fa;
+            border: 1px solid #cce5ff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+        
+        h4 { margin: 0 0 10px 0; color: #333; font-size: 15px; }
+        hr { border: 0; border-top: 1px dashed #ccc; margin: 15px 0; }
+        
+        /* 버튼 옵션 추가 그룹 스타일 분리 (반응형 적용 목적) */
+        .admin-input-group {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+            height: 40px;
+        }
+        .admin-input-group input {
+            flex: 1;
+            margin: 0;
+            height: 100%;
+            min-width: 0; /* 모바일 넘침 방지 */
+        }
+        .admin-input-group button {
+            margin: 0;
+            height: 100%;
+            padding: 0 15px;
+            flex-shrink: 0;
+        }
+
+        button { 
+            padding: 10px 15px; 
+            margin: 5px 5px 5px 0; 
+            border: 1px solid transparent; 
+            border-radius: 4px; 
+            background-color: rgb(63, 193, 201); 
+            color: white; 
+            cursor: pointer; 
+            font-size: 14px; 
+            transition: 0.2s;
+            box-sizing: border-box;
+            font-family: inherit; 
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        button:hover { filter: brightness(1.1); }
+        
+        button.copy-btn { background-color: rgb(54, 79, 107); }
+        
+        button.success { 
+            background-color: rgb(63, 193, 201); 
+            height: 42px;
+            padding: 0 15px; 
+        }
+        
+        button.reset { background-color: rgb(252, 81, 133); }
+        button.small { padding: 5px 10px; font-size: 12px; margin: 0; }
+
+        .textarea-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .textarea-group textarea {
+            flex: 1; 
+            min-width: 0;
+            margin-top: 0;
+        }
+
+        .textarea-group button.copy-btn {
+            width: 65px; 
+            height: 42px; 
+            margin: 0;
+            padding: 0; 
+            flex-shrink: 0;
+        }
+
+        button.copied-state {
+            background-color: white !important;
+            color: rgb(54, 79, 107) !important;
+            border-color: rgb(54, 79, 107) !important;
+        }
+        button.saved-state {
+            background-color: white !important;
+            color: rgb(63, 193, 201) !important;
+            border-color: rgb(63, 193, 201) !important;
+        }
+        
+        input { 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            margin-right: 5px; 
+            font-family: inherit; 
+            box-sizing: border-box;
+            color: #333;
+        }
+        
+        textarea { 
+            display: block; 
+            width: 100%; 
+            max-width: 100%; 
+            min-height: 80px; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            resize: none; 
+            overflow: hidden; 
+            font-family: inherit; 
+            box-sizing: border-box; 
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        .total-display { font-size: 18px; margin: 15px 0 10px 0; font-weight: bold; }
+        .reset-container { margin-top: 15px; text-align: right; }
+        
+        .admin-item { 
+            background: #fff; 
+            padding: 8px 12px; 
+            margin-bottom: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px;
+            color: #333;
+            transition: border 0.2s, opacity 0.2s;
+            gap: 10px;
+        }
+
+        .admin-item-details { display: flex; align-items: center; min-width: 0; }
+        .admin-item-details > span:last-child { overflow-wrap: anywhere; }
+        .admin-item button.small { flex-shrink: 0; }
+        .admin-panel button.success {
+            max-width: 100%;
+            min-height: 42px;
+            height: auto;
+            white-space: normal;
+        }
+        
+        .admin-item.dragging {
+            opacity: 0.4;
+            background-color: #f8f9fa;
+        }
+        .admin-item.drag-over {
+            border: 2px dashed rgb(63, 193, 201);
+            background-color: #f1fcfe;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #adb5bd;
+            margin-right: 10px;
+            font-size: 16px;
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* --- 반응형 레이아웃 미디어 쿼리 --- */
+        
+        /* 1024px 이하 (태블릿 및 모바일): 단락을 세로로 배치 */
+        @media screen and (max-width: 1024px) {
+            body { 
+                padding: 15px; 
+            }
+            h2.main-title {
+                font-size: 26px;
+                margin-bottom: 20px;
+            }
+            .app-container {
+                flex-direction: column; /* 세로 일렬 배치 */
+                gap: 15px;
+            }
+            .left-column, .right-column {
+                flex: none;
+                max-width: 100%; /* 너비를 꽉 차게 변경 */
+            }
+        }
+        
+        /* 600px 이하 (작은 모바일): 내부 세부 레이아웃 조정 */
+        @media screen and (max-width: 600px) {
+            .section-wrapper {
+                padding: 15px;
+            }
+            .section-header h3 {
+                font-size: 18px;
+            }
+            .admin-input-group {
+                flex-direction: column; /* 입력칸 세로 정렬 */
+                height: auto;
+                gap: 8px;
+            }
+            .admin-input-group input, 
+            .admin-input-group button {
+                width: 100%;
+                height: 42px;
+            }
+            .admin-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .admin-item button.small {
+                align-self: flex-end; /* 모바일에서 삭제 버튼 우측 정렬 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2 class="main-title">🎨 커미션 진행 안내 도우미</h2>
+
+    <div class="app-container">
+        
+        <!-- 왼쪽 단 -->
+        <div class="left-column">
+            
+            <div class="section-wrapper">
+                <div class="section-header">
+                    <h3>1. 결제 안내 (금액 계산기)</h3>
+                    <button class="setting-btn" onclick="togglePanel('adminPanel1')">관리</button>
+                </div>
+                
+                <div class="section-body">
+                    <div id="adminPanel1" class="admin-panel">
+                        <h4>[ 🔘 버튼 옵션 관리 ]</h4>
+                        
+                        <div class="admin-input-group">
+                            <input type="text" id="newType" placeholder="타입명 (예: 타입 1)">
+                            <input type="text" id="newName" placeholder="버튼명 (예: 전신)">
+                            <input type="number" id="newPrice" placeholder="금액(숫자)">
+                            <button onclick="addNewOption()">➕ 추가</button>
+                        </div>
+                        
+                        <div id="adminListArea"></div>
+                        
+                        <hr>
+                        
+                        <h4>[ 📝 결제 안내문 양식 설정 ]</h4>
+                        <p style="font-size: 13px; color: #555; margin: 0 0 10px 0; line-height: 1.5;">
+                            양식에 아래의 키워드를 입력해 두면 계산기 내용이 자동으로 적용됩니다.<br>
+                            <b>{버튼}</b> : 선택한 버튼 이름들 (예: (전신) + (소품 추가×3))<br>
+                            <b>{개별 금액}</b> : 선택한 버튼 금액들 (예: (50,000) + (10,000×3))<br>
+                            <b>{최종 금액}</b> : 합산된 총 금액
+                        </p>
+                        <textarea id="paymentTemplateInput" autocomplete="off" style="height: 90px; margin-bottom: 10px;"></textarea>
+                        <button class="success" onclick="savePaymentTemplate(this)">양식 저장하기</button>
+                    </div>
+
+                    <div id="calculatorArea"></div>
+
+                    <div class="reset-container">
+                        <button class="reset" onclick="resetAmount()">계산기 초기화</button>
+                    </div>
+
+                    <div class="total-display">현재 총액: <span id="totalAmount" style="color:rgb(252, 81, 133);">0</span>원</div>
+                    
+                    <div class="textarea-group">
+                        <textarea id="paymentText" autocomplete="off"></textarea>
+                        <button class="copy-btn" onclick="copyText('paymentText', this)">복사</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 오른쪽 단 -->
+        <div class="right-column">
+            
+            <div class="section-wrapper">
+                <div class="section-header">
+                    <h3>2. 2차 컨펌 안내</h3>
+                    <button class="setting-btn" onclick="togglePanel('adminPanel2')">관리</button>
+                </div>
+
+                <div class="section-body">
+                    <div id="adminPanel2" class="admin-panel">
+                        <p style="font-size: 13px; color: #333; margin: 0 0 10px 0;">작성해 둔 현재 내용을 다음에도 계속 사용할 '기본 양식'으로 저장합니다.</p>
+                        <button class="success" onclick="saveTextTemplate('confirm1Text', 'confirm1Text', this)">현재 내용을 기본 양식으로 저장</button>
+                    </div>
+
+                    <div class="textarea-group">
+                        <textarea id="confirm1Text" autocomplete="off"></textarea>
+                        <button class="copy-btn" onclick="copyText('confirm1Text', this)">복사</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-wrapper">
+                <div class="section-header">
+                    <h3>3. 최종 컨펌 안내</h3>
+                    <button class="setting-btn" onclick="togglePanel('adminPanel3')">관리</button>
+                </div>
+
+                <div class="section-body">
+                    <div id="adminPanel3" class="admin-panel">
+                        <p style="font-size: 13px; color: #333; margin: 0 0 10px 0;">작성해 둔 현재 내용을 다음에도 계속 사용할 '기본 양식'으로 저장합니다.</p>
+                        <button class="success" onclick="saveTextTemplate('confirmFinalText', 'confirmFinalText', this)">현재 내용을 기본 양식으로 저장</button>
+                    </div>
+
+                    <div class="textarea-group">
+                        <textarea id="confirmFinalText" autocomplete="off"></textarea>
+                        <button class="copy-btn" onclick="copyText('confirmFinalText', this)">복사</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const ZWS_ITEM = '\u200B';
+        const ZWS_PRICE = '\u200C';
+        const ZWS_TOTAL = '\u200D';
+        
+        let selectedOptionsList = [];
+        let currentTotal = 0;
+
+        const defaultData = {
+            options: [
+                { type: "타입 1: 캐릭터 기본", name: "전신", price: 50000 },
+                { type: "타입 1: 캐릭터 기본", name: "반신", price: 30000 },
+                { type: "타입 2: 추가 요소", name: "배경 추가", price: 20000 },
+                { type: "타입 2: 추가 요소", name: "소품 추가", price: 10000 }
+            ],
+            paymentTemplate: "안녕하세요! 커미션 신청해 주셔서 감사합니다.\n이번 작업의 결제 금액은\n[{버튼} = {개별 금액} = {최종 금액}원] 입니다.\n\n[계좌번호: OOO은행 123-456-7890 홍길동]\n입금 후 확인 답장 부탁드리겠습니다!",
+            confirm1Text: "안녕하세요! 2차 컨펌을 위해 연락드렸습니다.\n첨부된 이미지를 확인해 주시고, 수정이 필요한 부분이 있다면 편하게 말씀해 주십시오.",
+            confirmFinalText: "안녕하세요! 최종 완성본 컨펌을 위해 연락드렸습니다.\n확인 후 이상이 없으시다면, 기재해 주신 이메일로 원본 해상도 파일을 발송해 드리겠습니다. 감사합니다!"
+        };
+
+        let appData = JSON.parse(localStorage.getItem('commissionAppData'));
+        
+        if (!appData) {
+            appData = defaultData;
+            let oldOptions = JSON.parse(localStorage.getItem('commissionOptions'));
+            if (oldOptions) {
+                appData.options = oldOptions;
+            }
+        }
+
+        if (appData.paymentTemplate === "안녕하세요! 커미션 신청해 주셔서 감사합니다.\n이번 작업의 총 결제 금액은 {금액}원입니다.\n\n[계좌번호: OOO은행 123-456-7890 홍길동]\n입금 후 확인 답장 부탁드리겠습니다!") {
+            appData.paymentTemplate = defaultData.paymentTemplate;
+            saveAllData();
+        }
+
+        if (appData.paymentTemplate.includes('({버튼}) = ({개별 금액}) = {최종 금액}')) {
+            appData.paymentTemplate = appData.paymentTemplate.replace(/\(\{(버튼|개별 금액)\}\)/g, '{$1}');
+            saveAllData();
+        }
+
+        function saveAllData() {
+            localStorage.setItem('commissionAppData', JSON.stringify(appData));
+        }
+
+        function togglePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            if (panel.style.display === "none" || panel.style.display === "") {
+                panel.style.display = "block";
+                const textareas = panel.querySelectorAll('textarea');
+                textareas.forEach(ta => autoResizeTextarea(ta));
+            } else {
+                panel.style.display = "none";
+            }
+        }
+
+        function autoResizeTextarea(element) {
+            element.style.height = 'auto'; 
+            element.style.height = (element.scrollHeight + 2) + 'px'; 
+        }
+
+        function initApp() {
+            document.getElementById('paymentTemplateInput').value = appData.paymentTemplate;
+            document.getElementById('confirm1Text').value = appData.confirm1Text;
+            document.getElementById('confirmFinalText').value = appData.confirmFinalText;
+            
+            renderCalculator();
+            renderAdminList();
+            
+            document.getElementById('paymentText').value = ""; 
+            updateLivePaymentText(); 
+
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(ta => {
+                autoResizeTextarea(ta);
+                ta.addEventListener('input', function() {
+                    autoResizeTextarea(this);
+                });
+            });
+        }
+
+        function addNewOption() {
+            const type = document.getElementById('newType').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const price = parseInt(document.getElementById('newPrice').value);
+
+            if (!type || !name || isNaN(price)) {
+                alert("타입명, 버튼명, 금액(숫자)을 모두 올바르게 입력해 주십시오.");
+                return;
+            }
+
+            appData.options.push({ type: type, name: name, price: price });
+            document.getElementById('newName').value = "";
+            document.getElementById('newPrice').value = "";
+            
+            saveAllData();
+            renderCalculator();
+            renderAdminList();
+        }
+
+        function deleteOption(index) {
+            if(confirm("이 항목을 삭제하시겠습니까?")) {
+                appData.options.splice(index, 1);
+                saveAllData();
+                renderCalculator();
+                renderAdminList();
+                reorderSelectedOptions();
+            }
+        }
+
+        /* --- 드래그 앤 드롭 구현부 --- */
+        let dragStartIndex = -1;
+
+        function handleDragStart(e) {
+            dragStartIndex = +this.dataset.index;
+            e.dataTransfer.effectAllowed = 'move';
+            this.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            const dragEndIndex = +this.dataset.index;
+            
+            if (dragStartIndex !== -1 && dragStartIndex !== dragEndIndex) {
+                const draggedItem = appData.options.splice(dragStartIndex, 1)[0];
+                appData.options.splice(dragEndIndex, 0, draggedItem);
+                
+                saveAllData();
+                renderAdminList();
+                renderCalculator();
+                reorderSelectedOptions();
+            }
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            const items = document.querySelectorAll('.admin-item');
+            items.forEach(item => item.classList.remove('drag-over'));
+        }
+        /* --- 드래그 앤 드롭 구현부 끝 --- */
+
+        function renderAdminList() {
+            const adminListArea = document.getElementById('adminListArea');
+            adminListArea.innerHTML = "";
+            
+            appData.options.forEach((opt, index) => {
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+                div.draggable = true;
+                div.dataset.index = index;
+                
+                const details = document.createElement('div');
+                details.className = 'admin-item-details';
+                const handle = document.createElement('span');
+                handle.className = 'drag-handle';
+                handle.title = '드래그하여 순서 변경';
+                handle.textContent = '☰';
+                const label = document.createElement('span');
+                const name = document.createElement('b');
+                name.textContent = opt.name;
+                label.append(`[${opt.type}] `, name, ` : ${opt.price.toLocaleString()}원`);
+                details.append(handle, label);
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'reset small';
+                deleteButton.textContent = '삭제';
+                deleteButton.onclick = () => deleteOption(index);
+                div.append(details, deleteButton);
+                
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragenter', handleDragEnter);
+                div.addEventListener('dragleave', handleDragLeave);
+                div.addEventListener('dragend', handleDragEnd);
+
+                adminListArea.appendChild(div);
+            });
+        }
+
+        function renderCalculator() {
+            const calcArea = document.getElementById('calculatorArea');
+            calcArea.innerHTML = "";
+
+            const grouped = new Map();
+            appData.options.forEach(opt => {
+                if (!grouped.has(opt.type)) grouped.set(opt.type, []);
+                grouped.get(opt.type).push(opt);
+            });
+
+            const types = Array.from(grouped.keys());
+            
+            types.forEach((type, index) => {
+                const typeWrapper = document.createElement('div');
+                const heading = document.createElement('h4');
+                heading.textContent = type;
+                typeWrapper.appendChild(heading);
+                
+                grouped.get(type).forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.innerText = `${opt.name} (+${opt.price.toLocaleString()})`;
+                    btn.onclick = () => { addAmount(opt.name, opt.price); };
+                    typeWrapper.appendChild(btn);
+                });
+                
+                calcArea.appendChild(typeWrapper);
+                
+                if (index < types.length - 1) {
+                    calcArea.appendChild(document.createElement('hr'));
+                }
+            });
+        }
+
+        function reorderSelectedOptions() {
+            if (selectedOptionsList.length > 0) {
+                selectedOptionsList.sort((a, b) => {
+                    const indexA = appData.options.findIndex(opt => opt.name === a.name && opt.price === a.price);
+                    const indexB = appData.options.findIndex(opt => opt.name === b.name && opt.price === b.price);
+                    return indexA - indexB;
+                });
+                updateLivePaymentText(); 
+            }
+        }
+
+        function addAmount(name, price) {
+            let existingItem = selectedOptionsList.find(item => item.name === name && item.price === price);
+            
+            if (existingItem) {
+                existingItem.count += 1;
+            } else {
+                selectedOptionsList.push({ name: name, price: price, count: 1 });
+            }
+            
+            reorderSelectedOptions();
+            
+            currentTotal += price;
+            document.getElementById('totalAmount').innerText = currentTotal.toLocaleString();
+            updateLivePaymentText(); 
+        }
+
+        function resetAmount() {
+            selectedOptionsList = [];
+            currentTotal = 0;
+            document.getElementById('totalAmount').innerText = "0";
+            updateLivePaymentText();
+        }
+
+        function updateLivePaymentText() {
+            const templateText = appData.paymentTemplate;
+            
+            const itemsStr = selectedOptionsList.length > 0 
+                ? selectedOptionsList.map(o => o.count > 1 ? `(${o.name}×${o.count})` : `(${o.name})`).join(' + ') 
+                : "항목 없음";
+            
+            const pricesStr = selectedOptionsList.length > 0 
+                ? selectedOptionsList.map(o => o.count > 1 ? `(${o.price.toLocaleString()}×${o.count})` : `(${o.price.toLocaleString()})`).join(' + ') 
+                : "0";
+                
+            const totalStr = currentTotal.toLocaleString();
+
+            const paymentTextElement = document.getElementById('paymentText');
+            let currentVal = paymentTextElement.value;
+            
+            const regexItem = new RegExp(`${ZWS_ITEM}[^${ZWS_ITEM}]*${ZWS_ITEM}`, 'g');
+            const regexPrice = new RegExp(`${ZWS_PRICE}[^${ZWS_PRICE}]*${ZWS_PRICE}`, 'g');
+            const regexTotal = new RegExp(`${ZWS_TOTAL}[^${ZWS_TOTAL}]*${ZWS_TOTAL}`, 'g');
+            
+            const hasMarkers = currentVal.includes(ZWS_ITEM) || currentVal.includes(ZWS_PRICE) || currentVal.includes(ZWS_TOTAL);
+            
+            if (hasMarkers) {
+                let newVal = currentVal;
+                if (currentVal.includes(ZWS_ITEM)) newVal = newVal.replace(regexItem, `${ZWS_ITEM}${itemsStr}${ZWS_ITEM}`);
+                if (currentVal.includes(ZWS_PRICE)) newVal = newVal.replace(regexPrice, `${ZWS_PRICE}${pricesStr}${ZWS_PRICE}`);
+                if (currentVal.includes(ZWS_TOTAL)) newVal = newVal.replace(regexTotal, `${ZWS_TOTAL}${totalStr}${ZWS_TOTAL}`);
+                paymentTextElement.value = newVal;
+            } else {
+                let newVal = templateText
+                    .replace(/{버튼}/g, `${ZWS_ITEM}${itemsStr}${ZWS_ITEM}`)
+                    .replace(/{개별 금액}/g, `${ZWS_PRICE}${pricesStr}${ZWS_PRICE}`)
+                    .replace(/{최종 금액}/g, `${ZWS_TOTAL}${totalStr}${ZWS_TOTAL}`)
+                    .replace(/{금액}/g, `${ZWS_TOTAL}${totalStr}${ZWS_TOTAL}`); 
+                
+                paymentTextElement.value = newVal;
+            }
+            
+            autoResizeTextarea(paymentTextElement);
+        }
+
+        function showSaveSuccess(btnElement) {
+            if (!btnElement.dataset.originalText) {
+                const rect = btnElement.getBoundingClientRect();
+                btnElement.style.width = rect.width + 'px';
+                btnElement.dataset.originalText = btnElement.innerText;
+            }
+            
+            btnElement.innerText = '저장 완료!'; 
+            btnElement.classList.add('saved-state'); 
+            
+            setTimeout(() => {
+                btnElement.innerText = btnElement.dataset.originalText;
+                btnElement.classList.remove('saved-state'); 
+            }, 1500);
+        }
+
+        function savePaymentTemplate(btnElement) {
+            const templateInput = document.getElementById('paymentTemplateInput');
+            appData.paymentTemplate = templateInput.value.replace(/[\u200B\u200C\u200D]/g, ''); 
+            saveAllData();
+            
+            document.getElementById('paymentText').value = "";
+            updateLivePaymentText();
+            
+            showSaveSuccess(btnElement); 
+        }
+
+        function saveTextTemplate(dataKey, textAreaId, btnElement) {
+            appData[dataKey] = document.getElementById(textAreaId).value.replace(/[\u200B\u200C\u200D]/g, '');
+            saveAllData();
+            showSaveSuccess(btnElement); 
+        }
+
+        function copyText(elementId, btnElement) {
+            let text = document.getElementById(elementId).value;
+            text = text.replace(/[\u200B\u200C\u200D]/g, ''); 
+            
+            navigator.clipboard.writeText(text).then(() => {
+                if (!btnElement.dataset.originalText) {
+                    btnElement.dataset.originalText = btnElement.innerText;
+                }
+                
+                btnElement.innerText = '완료!';
+                btnElement.classList.add('copied-state'); 
+                
+                setTimeout(() => {
+                    btnElement.innerText = btnElement.dataset.originalText;
+                    btnElement.classList.remove('copied-state'); 
+                }, 1500);
+            }).catch(err => {
+                alert('복사에 실패했습니다. 브라우저 권한을 확인해 주십시오.');
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+
+        window.addEventListener('load', () => {
+            document.getElementById('paymentText').value = "";
+            updateLivePaymentText();
+        });
+
+        document.fonts.ready.then(() => {
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(ta => autoResizeTextarea(ta));
+        });
+    </script>
+</body>
+</html>
