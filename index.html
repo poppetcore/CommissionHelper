@@ -235,16 +235,10 @@
         }
         
         .total-display { font-size: 18px; margin: 15px 0 10px 0; font-weight: bold; }
-        .percentage-panel { margin-top: 20px; padding-top: 16px; border-top: 1px dashed #ccc; }
         .admin-option-kind { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 13px; }
         .admin-option-kind select { max-width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font: inherit; color: #333; background: white; }
         button.selected-percentage { background: white; color: #258e95; border-color: #258e95; }
-        .percentage-help, .percentage-breakdown { font-size: 13px; color: #555; line-height: 1.5; }
-        .percentage-help { margin: 10px 0; }
         .percentage-error { margin: 8px 0; color: #bd244d; font-size: 13px; }
-        .percentage-item { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 6px; padding: 10px; border: 1px solid #dce0e4; border-radius: 6px; background: #f8f9fa; }
-        .percentage-item span { min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
-        .percentage-item button { flex-shrink: 0; }
         .reset-container { margin-top: 15px; text-align: right; }
         
         .admin-item { 
@@ -392,16 +386,12 @@
 
                     <div id="calculatorArea"></div>
 
-                    <div class="percentage-panel">
-                        <p id="percentageError" class="percentage-error" role="alert" hidden></p>
-                        <div id="percentageList"></div>
-                    </div>
+                    <p id="percentageError" class="percentage-error" role="alert" hidden></p>
 
                     <div class="reset-container">
                         <button class="reset" onclick="resetAmount()">계산기 초기화</button>
                     </div>
 
-                    <div id="percentageBreakdown" class="percentage-breakdown" hidden>옵션 합계: <span id="baseAmount">0</span>원<br>적용 비율: <span id="appliedPercentage">100</span>%</div>
                     <div class="total-display" aria-live="polite">현재 총액: <span id="totalAmount" style="color:rgb(252, 81, 133);">0</span>원</div>
                     
                     <div class="textarea-group">
@@ -790,6 +780,12 @@
 
         function applyPercentageAdjustment(option) {
             const error = document.getElementById('percentageError');
+            if (percentageAdjustment?.option === option) {
+                percentageAdjustment = null;
+                error.hidden = true;
+                updateLivePaymentText();
+                return;
+            }
             const rate = Number(option.rate);
             if (!Number.isFinite(rate) || rate <= 0 || rate > Number.MAX_SAFE_INTEGER ||
                 !Number.isSafeInteger(Math.round(currentTotal * (rate / 100)))) {
@@ -807,30 +803,6 @@
         }
 
         function renderPercentageAdjustments(pricing) {
-            const list = document.getElementById('percentageList');
-            list.replaceChildren();
-            if (percentageAdjustment) {
-                const item = percentageAdjustment;
-                const row = document.createElement('div');
-                row.className = 'percentage-item';
-                const label = document.createElement('span');
-                label.textContent = `${item.name} · 전체 금액의 ${item.rate}% = ${pricing.total.toLocaleString()}원`;
-                const remove = document.createElement('button');
-                remove.type = 'button';
-                remove.className = 'reset small';
-                remove.textContent = '해제';
-                remove.setAttribute('aria-label', '금액 비율 해제');
-                remove.onclick = () => {
-                    percentageAdjustment = null;
-                    document.getElementById('percentageError').hidden = true;
-                    updateLivePaymentText();
-                };
-                row.append(label, remove);
-                list.appendChild(row);
-            }
-            document.getElementById('percentageBreakdown').hidden = !percentageAdjustment;
-            document.getElementById('baseAmount').textContent = currentTotal.toLocaleString();
-            document.getElementById('appliedPercentage').textContent = pricing.rate;
             document.getElementById('totalAmount').textContent = pricing.total.toLocaleString();
             updatePercentageButtons();
         }
